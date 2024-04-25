@@ -1,12 +1,15 @@
-from django.urls import path
-from . import views
 
+from django.urls import path
+from .views import index,home,SingleMenuItemView,MenuItemsView, msg
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
-    path('', views.home, name="home"),
-    path('about/', views.about, name="about"),
-    path('book/', views.book, name="book"),
-    path('menu/', views.menu, name="menu"),
-    path('menu_item/<int:pk>/', views.display_menu_item, name="menu_item"),  
-    path('bookings/', views.bookings, name="bookings"),
+    path('', index, name='index'),
+    path('',home,name="home"),
+    path('menu-items/',MenuItemsView.as_view()),
+    path('menu-items/<int:pk>',SingleMenuItemView.as_view()),
+    #path('booking/',BookingViewSet),
+    #path('booking/<int:pk>',SingleBookingView),
+    path('message/', msg),
+    path('api-token-auth/', obtain_auth_token),
 ]

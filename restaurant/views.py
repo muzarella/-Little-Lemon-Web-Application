@@ -1,45 +1,43 @@
-# from django.http import HttpResponse
 from django.shortcuts import render
+from rest_framework.views import APIView 
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes 
+from rest_framework import generics,viewsets
+from rest_framework.permissions import IsAuthenticated
 
-from .models import Menu
-from django.core import serializers
-from .models import Booking
-from datetime import datetime
-import json
-from .forms import BookingForm
+from .models import MenuItem,Booking
+from .serializers import MenuSerializer,BookingSerializer
+
+# Create your views here.
+def index(request):
+    return render(request, 'index.html', {})
 
 def home(request):
-    return render(request, 'index.html')
+    return render(request, 'index.html', {})
 
-def about(request):
-    return render(request, 'about.html')
+class MenuItemsView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuSerializer
 
-def book(request):
-    form = BookingForm()
-    if request.method == 'POST':
-        form = BookingForm(request.POST)
-        if form.is_valid():
-            form.save()
-    context = {'form':form}
-    return render(request, 'book.html', context)
+class SingleMenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuSerializer
 
-# Add code for the bookings() view
-def Bookings(request):
-    date = request.GET.get('date', datetime.today().date)
-    bookings = Bookings.objects.all().filter(reservation_date=date)
-    booking_json = serializers.serialize('json', bookings)
-    return render( request, 'bookings.html', {'bookings': booking_json} )
+class BookingViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
 
-
-def menu(request):
-    menu_data = Menu.objects.all()
-    main_data = {"menu": menu_data}
-    return render(request, 'menu.html', {"menu": main_data})
+# class SingleBookingView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
+#     permission_classes = [IsAuthenticated]
+#     queryset = Booking.objects.all()
+#     serializer_class = MenuSerializer
 
 
-def display_menu_item(request, pk=None): 
-    if pk: 
-        menu_item = Menu.objects.get(pk=pk) 
-    else: 
-        menu_item = "" 
-    return render(request, 'menu_item.html', {"menu_item": menu_item}) 
+@api_view()
+@permission_classes([IsAuthenticated])
+# @authentication_classes([TokenAuthentication])
+def msg(request):
+    return Response({"message":"This view is protected"})
